@@ -2,16 +2,19 @@ using UnityEngine;
 
 public class NewBehaviourScript : MonoBehaviour
 {
-    [SerializeField] private float speed; // 角色移动速度
-    [SerializeField] private float firstJumpForce; // 第一次跳跃的力度
-    [SerializeField] private float glideForce = 0.5f; // 滑翔时的额外上升力度
-    [SerializeField] private float glideDuration = 1.0f; // 滑翔持续时间
-    [SerializeField] private float fallMultiplier = 2.5f; // 下降时的重力倍数
-    [SerializeField] private float lowJumpMultiplier = 2f; // 低跳时的重力倍数
-    private Rigidbody2D body; // 角色的Rigidbody2D组件
-    private bool isGrounded = true; // 角色是否站在地面上
-    private bool isGliding = false; // 角色是否正在滑翔
-    private float glideTimeLeft; // 剩余的滑翔时间
+    [SerializeField] private float speed; // Character movement speed
+    [SerializeField] private float sprintMultiplier = 2f; // Multiplier for sprinting speed
+    [SerializeField] private float firstJumpForce; // Force of the first jump
+    [SerializeField] private float secondJumpForce; // Force of the second jump
+    [SerializeField] private float glideForce = 0.5f; // Additional upward force during gliding
+    [SerializeField] private float glideDuration = 1.0f; // Gliding duration
+    [SerializeField] private float fallMultiplier = 2.5f; // Gravity multiplier when falling
+    [SerializeField] private float lowJumpMultiplier = 2f; // Gravity multiplier for low jumps
+    private Rigidbody2D body; // Rigidbody2D component of the character
+    private bool isGrounded = true; // Whether the character is on the ground
+    private bool isGliding = false; // Whether the character is gliding
+    private int jumpCount = 0; // Number of jumps made
+    private float glideTimeLeft; // Remaining gliding time
 
     private void Awake()
     {
@@ -20,37 +23,46 @@ public class NewBehaviourScript : MonoBehaviour
 
     private void Update()
     {
-        // 处理水平移动
+        // Handle horizontal movement
         float horizontalInput = Input.GetAxis("Horizontal");
-        body.velocity = new Vector2(horizontalInput * speed, body.velocity.y);
+        float currentSpeed = speed;
 
-        // 处理跳跃逻辑
-        if (Input.GetButtonDown("Jump") && isGrounded)
+        // Check if Shift is pressed and the character is grounded
+        if (Input.GetKey(KeyCode.LeftShift) && isGrounded)
         {
-            body.velocity = new Vector2(body.velocity.x, firstJumpForce);
-            isGrounded = false;
-            isGliding = false; // 重置滑翔状态
+            currentSpeed *= sprintMultiplier; // Increase speed when sprinting
         }
 
-        // 检查是否达到跳跃顶点并开始滑翔
+        body.velocity = new Vector2(horizontalInput * currentSpeed, body.velocity.y);
+
+        // Handle jump logic
+        if (Input.GetKeyDown(KeyCode.W) && (isGrounded || jumpCount < 2))
+        {
+            float jumpForce = (jumpCount == 0) ? firstJumpForce : secondJumpForce;
+            body.velocity = new Vector2(body.velocity.x, jumpForce);
+            isGrounded = false;
+            isGliding = false; // Reset gliding state
+            jumpCount++;
+        }
+
+        // Check if the jump peak has been reached and start gliding
         if (!isGrounded && !isGliding && body.velocity.y <= 0)
         {
-            if (Input.GetButton("Jump"))
+            if (Input.GetKey(KeyCode.W))
             {
                 isGliding = true;
                 glideTimeLeft = glideDuration;
             }
         }
-
-        // 处理滑翔逻辑
+        // Handle gliding logic
         if (isGliding && glideTimeLeft > 0)
         {
-            // 应用一个小的上升力来模拟滑翔，并逐渐减少以模拟下落趋势
+            // Apply a small upward force to simulate gliding and gradually decrease it to simulate a falling trend
             body.velocity = new Vector2(body.velocity.x, Mathf.Max(body.velocity.y, -glideForce));
             glideTimeLeft -= Time.deltaTime;
         }
 
-        // 当角色在下降时，增加额外的重力效果
+        // Add extra gravity effect when the character is falling
         if (!isGliding && body.velocity.y < 0)
         {
             body.velocity += Vector2.up * Physics2D.gravity.y * (fallMultiplier - 1) * Time.deltaTime;
@@ -59,11 +71,12 @@ public class NewBehaviourScript : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        // 当角色与地面碰撞时，重置跳跃和滑翔状态
+        // Reset jump and gliding state when the character collides with the ground
         if (collision.gameObject.CompareTag("Ground"))
         {
             isGrounded = true;
             isGliding = false;
+            jumpCount = 0; // Reset jump count
         }
     }
 }

@@ -13,13 +13,13 @@ TagManager:
   - 
   - Water
   - UI
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
+  - Background
+  - Foreground
+  - Player
+  - Enemy
+  - Interactable
+  - Effects
+  - Collision
   - 
   - 
   - 
