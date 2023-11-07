@@ -72,7 +72,7 @@ public class NewBehaviourScript : MonoBehaviour
     private void OnCollisionEnter2D(Collision2D collision)
     {
         // Reset jump and gliding state when the character collides with the ground
-        if (collision.gameObject.CompareTag("Ground"))
+        if (collision.collider.gameObject.layer == LayerMask.NameToLayer("Ground"))
         {
             isGrounded = true;
             isGliding = false;
