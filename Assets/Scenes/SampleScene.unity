@@ -182,6 +182,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 7845645207931952370, guid: 9209d22fbbf572339826558aba536d3e, type: 3}
       insertIndex: -1
       addedObject: {fileID: 362901017}
+    - targetCorrespondingSourceObject: {fileID: 7845645207931952370, guid: 9209d22fbbf572339826558aba536d3e, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 362901019}
   m_SourcePrefab: {fileID: 100100000, guid: 9209d22fbbf572339826558aba536d3e, type: 3}
 --- !u!1 &362901014 stripped
 GameObject:
@@ -201,6 +204,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   groundTilePrefab: {fileID: 136333181784006029, guid: 06caa7abecaa90949a2b0bcea29a3227, type: 3}
+  mainCamera: {fileID: 0}
 --- !u!114 &362901017
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -218,12 +222,27 @@ MonoBehaviour:
   mainCamera: {fileID: 519420031}
   spawnOffset: 10
   despawnOffset: 5
-  minPlatforms: 1
-  maxPlatforms: 5
-  minPlatformSpacing: 0.3
-  maxPlatformSpacing: 0.6
-  minY: -2
-  maxY: 2
+  minPlatformCount: 1
+  maxPlatformCount: 5
+  minHorizontalSpacing: 0.5
+  maxHorizontalSpacing: 2
+  notePrefab: {fileID: 8922071434404647647, guid: ed2a47a1a89669644b4a63dc48282457, type: 3}
+  noteHeight: 2
+--- !u!114 &362901019
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 362901014}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2c837a73699c3cf40a637f16cb6c4e84, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  scaleUpTime: 0.5
+  scaleMultiplier: 1.5
+  scoreValue: 0
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0

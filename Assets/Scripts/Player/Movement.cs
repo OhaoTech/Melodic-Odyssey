@@ -1,4 +1,5 @@
-using UnityEngine;
+﻿using UnityEngine;
+using UnityEngine.SocialPlatforms.Impl;
 
 public class NewBehaviourScript : MonoBehaviour
 {
@@ -17,7 +18,7 @@ public class NewBehaviourScript : MonoBehaviour
     private int jumpCount = 0; // Number of jumps made
     private float glideTimeLeft; // Remaining gliding time
 
-
+    public float score;
     private void Awake()
     {
         body = GetComponent<Rigidbody2D>();
@@ -103,6 +104,21 @@ public class NewBehaviourScript : MonoBehaviour
         }
     }
 
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.gameObject.tag == "Note")
+        {
+            NoteManager noteManager = collision.GetComponent<NoteManager>();
+            if (noteManager != null)
+            {
+                // 增加分数
+                score += noteManager.scoreValue;
+
+                // 消费音符（播放淡出动画并销毁）
+                noteManager.ConsumeNote();
+            }
+        }
+    }
 
 
 }

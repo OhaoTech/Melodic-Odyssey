@@ -1,5 +1,14 @@
 using UnityEngine;
 
+public static class CameraUtilities
+{
+    public static bool IsOutOfView(Transform objectTransform, Camera camera)
+    {
+        Vector3 viewPos = camera.WorldToViewportPoint(objectTransform.position);
+        return viewPos.x < 0 || viewPos.x > 1 || viewPos.y < 0 || viewPos.y > 1;
+    }
+}
+
 public class GroundManager : MonoBehaviour
 {
     public GameObject groundTilePrefab;
@@ -7,6 +16,8 @@ public class GroundManager : MonoBehaviour
     private GameObject[] groundTiles = new GameObject[2];
     private Transform playerTransform;
     private Vector2 groundTileSize;
+    public Camera mainCamera; 
+    
 
     // Offset to position the ground correctly relative to the player's feet.
     private Vector2 offset = new Vector2(0.43f, -2f); 
@@ -14,6 +25,7 @@ public class GroundManager : MonoBehaviour
     void Start()
     {
         playerTransform = GameObject.FindGameObjectWithTag("Player").transform;
+        mainCamera = Camera.main;   
         InitializeGround();
     }
 
@@ -24,6 +36,7 @@ public class GroundManager : MonoBehaviour
 
         for (int i = 0; i < groundTiles.Length; i++)
         {
+            
             // Instantiate the tile and scale it.
             groundTiles[i] = Instantiate(groundTilePrefab, new Vector2(i * groundTileSize.x, 0), Quaternion.identity);
             groundTiles[i].transform.localScale = scale;
@@ -34,6 +47,8 @@ public class GroundManager : MonoBehaviour
             // Adjust y position to match the player's feet assuming the player's pivot is at the bottom.
             float playerFeetYPosition = playerTransform.position.y - (playerTransform.localScale.y / 2);
             groundTiles[i].transform.position = new Vector2(i * groundTileSize.x, playerFeetYPosition - (groundTileSize.y / 2)) + offset;
+
+            
         }
     }
 
@@ -42,20 +57,24 @@ public class GroundManager : MonoBehaviour
     {
         foreach (var tile in groundTiles)
         {
-            // If the tile is off-screen to the left of the player, recycle it to the right.
-            if (playerTransform.position.x - tile.transform.position.x > groundTileSize.x)
+            if (CameraUtilities.IsOutOfView(tile.transform, mainCamera))
             {
-                // Calculate the position for the tile to be recycled to.
-                float newXPosition = tile.transform.position.x + groundTileSize.x * groundTiles.Length;
-                tile.transform.position = new Vector3(newXPosition, tile.transform.position.y, tile.transform.position.z);
+                if (playerTransform.position.x - tile.transform.position.x > groundTileSize.x)
+                {
+                    // Calculate the position for the tile to be recycled to.
+                    float newXPosition = tile.transform.position.x + groundTileSize.x * groundTiles.Length;
+                    tile.transform.position = new Vector3(newXPosition, tile.transform.position.y, tile.transform.position.z);
+                }
+                // If the tile is off-screen to the right of the player, recycle it to the left.
+                else if (playerTransform.position.x - tile.transform.position.x < -groundTileSize.x)
+                {
+                    // Calculate the position for the tile to be recycled to.
+                    float newXPosition = tile.transform.position.x - groundTileSize.x * groundTiles.Length;
+                    tile.transform.position = new Vector3(newXPosition, tile.transform.position.y, tile.transform.position.z);
+                }
+
             }
-            // If the tile is off-screen to the right of the player, recycle it to the left.
-            else if (playerTransform.position.x - tile.transform.position.x < -groundTileSize.x)
-            {
-                // Calculate the position for the tile to be recycled to.
-                float newXPosition = tile.transform.position.x - groundTileSize.x * groundTiles.Length;
-                tile.transform.position = new Vector3(newXPosition, tile.transform.position.y, tile.transform.position.z);
-            }
+                // If the tile is off-screen to the left of the player, recycle it to the right.
         }
     }
 }

@@ -1,5 +1,6 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections.Generic;
+using UnityEditor.Experimental.GraphView;
 
 public class PlatformManager : MonoBehaviour
 {
@@ -17,6 +18,9 @@ public class PlatformManager : MonoBehaviour
     private List<GameObject> platforms = new List<GameObject>();
     private Vector2 screenBounds;
     private GameObject lastSpawnedPlatform = null;
+
+    public GameObject notePrefab; // 音符预设的引用
+    public float noteHeight = 2f; // 音符相对于平台的高度
 
     private void Start()
     {
@@ -100,6 +104,11 @@ public class PlatformManager : MonoBehaviour
         GameObject newPlatform = Instantiate(platformPrefab, spawnPosition, Quaternion.identity);
         newPlatform.layer = LayerMask.NameToLayer("Ground");
         platforms.Add(newPlatform);
+        if(newPlatform != null)
+        {
+
+        SpawnNoteAbovePlatform(newPlatform);
+        }
 
         return newPlatform;
     }
@@ -127,6 +136,18 @@ public class PlatformManager : MonoBehaviour
         }
     }
 
+    private void SpawnNoteAbovePlatform(GameObject platform)
+    {
+        Vector3 notePosition = platform.transform.position + new Vector3(0, noteHeight, 0);
+
+        // 实例化音符
+        GameObject newNote = Instantiate(notePrefab, notePosition, Quaternion.identity);
+
+        // 确保新生成的音符具有 NoteManager 脚本
+        NoteManager noteManager = newNote.AddComponent<NoteManager>();
+        // 如果您需要设置 NoteManager 的某些属性，可以在这里设置
+        // 例如：noteManager.fadeOutTime = 1f;
+    }
 
 
 }
