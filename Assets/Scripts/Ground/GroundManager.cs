@@ -9,7 +9,7 @@ public class GroundManager : MonoBehaviour
     private Vector2 groundTileSize;
 
     // Offset to position the ground correctly relative to the player's feet.
-    private Vector2 offset = new Vector2(0.43f, -4.94f); 
+    private Vector2 offset = new Vector2(0.43f, -2f); 
 
     void Start()
     {
@@ -19,7 +19,7 @@ public class GroundManager : MonoBehaviour
 
     void InitializeGround()
     {
-        Vector2 scale = new Vector2(20f, 20);
+        Vector2 scale = new Vector2(25f, 25f);
         groundTileSize = new Vector2(1 * scale.x, 1 * scale.y);
 
         for (int i = 0; i < groundTiles.Length; i++)
