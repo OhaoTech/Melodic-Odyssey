@@ -3,20 +3,23 @@ using System.Collections.Generic;
 
 public class PlatformManager : MonoBehaviour
 {
-    public GameObject platformPrefab; // Your platform prefab
-    public Transform player; // Reference to the player object
-    public Camera mainCamera; // Reference to the main camera
-    public float spawnOffset = 10f; // How far ahead of the player to spawn platforms
-    public float despawnOffset = 5f; // How far off-screen platforms should be before despawning
+    public GameObject platformPrefab;
+    public Transform player;
+    public Camera mainCamera;
+    public float spawnOffset = 10f;
+    public float despawnOffset = 5f;
+    public int minPlatformCount = 1; // Minimum number of platforms to spawn each time
+    public int maxPlatformCount = 5; // Maximum number
+    public float minHorizontalSpacing = 0.5f; // Minimum horizontal spacing between platforms
+    public float maxHorizontalSpacing = 2.0f; // Maximum horizontal spacing
+    private float minGap = 0.01f;
 
-    private List<GameObject> platforms = new List<GameObject>(); // List to hold the platforms
-    private Vector2 screenBounds; // To store the screen bounds
-    private float minGap = 0.3f; // Minimum gap between platforms, adjust this value as needed
-
+    private List<GameObject> platforms = new List<GameObject>();
+    private Vector2 screenBounds;
+    private GameObject lastSpawnedPlatform = null;
 
     private void Start()
     {
-        // Calculate the screen bounds
         float camHeight = mainCamera.orthographicSize * 2;
         float camWidth = camHeight * mainCamera.aspect;
         screenBounds = new Vector2(camWidth, camHeight) / 2;
@@ -24,40 +27,51 @@ public class PlatformManager : MonoBehaviour
 
     private void Update()
     {
-        // Determine the direction of the player's movement
         float direction = Input.GetAxis("Horizontal");
 
-        // Spawn platforms if needed
         if (direction > 0)
         {
-            SpawnPlatform(player.position.x + spawnOffset, player.position.y);
+            TrySpawnPlatform(player.position.x + spawnOffset, player.position.y);
         }
         else if (direction < 0)
         {
-            SpawnPlatform(player.position.x - spawnOffset, player.position.y);
+            TrySpawnPlatform(player.position.x - spawnOffset, player.position.y);
         }
 
-        // Check platforms for despawning
-        foreach (var platform in new List<GameObject>(platforms)) // Create a copy to modify the original list during iteration
+        DespawnPlatforms();
+    }
+
+    private void TrySpawnPlatform(float xPosition, float yPosition)
+    {
+        if (lastSpawnedPlatform != null)
         {
-            if (platform.transform.position.x < mainCamera.transform.position.x - screenBounds.x - despawnOffset ||
-                platform.transform.position.x > mainCamera.transform.position.x + screenBounds.x + despawnOffset)
+            float distanceFromLastPlatform = Mathf.Abs(lastSpawnedPlatform.transform.position.x - xPosition);
+            if (distanceFromLastPlatform < spawnOffset)
             {
-                platforms.Remove(platform);
-                Destroy(platform);
+                return;
             }
+        }
+
+        int platformCount = Random.Range(minPlatformCount, maxPlatformCount + 1);
+        for (int i = 0; i < platformCount; i++)
+        {
+            lastSpawnedPlatform = SpawnPlatform(xPosition, yPosition);
+            if (lastSpawnedPlatform == null) break; // If failed to spawn, exit loop
+
+            float horizontalSpacing = Random.Range(minHorizontalSpacing, maxHorizontalSpacing);
+            xPosition += lastSpawnedPlatform.GetComponent<Renderer>().bounds.size.x + horizontalSpacing;
         }
     }
 
-
-    private void SpawnPlatform(float xPosition, float yPosition)
+    private GameObject SpawnPlatform(float xPosition, float yPosition)
     {
         // The size of the platform, adjust if your platform has different dimensions
         Vector2 platformSize = platformPrefab.GetComponent<Renderer>().bounds.size;
 
-        // Adjust the xPosition to account for the gap
-        // This assumes platforms move to the right; for left movement, you would subtract the gap
-        xPosition += platformSize.x + minGap;
+        // Determine the direction of movement
+        float direction = Mathf.Sign(xPosition - player.position.x);
+        // Adjust the xPosition to account for the gap and direction
+        xPosition += (platformSize.x + minGap) * direction;
 
         // Check the nearest platform on the x-axis and see if the gap is large enough
         bool gapIsLargeEnough = true;
@@ -71,14 +85,14 @@ public class PlatformManager : MonoBehaviour
         }
 
         if (!gapIsLargeEnough)
-            return;
+            return null;
 
         // Perform an overlap box check to see if there's already a platform
         Collider2D overlapCheck = Physics2D.OverlapBox(new Vector2(xPosition, yPosition), platformSize, 0, LayerMask.GetMask("Ground"));
         if (overlapCheck != null)
         {
             // There's already a platform here, so don't spawn another
-            return;
+            return null;
         }
 
         // Spawn a new platform at the given position
@@ -86,7 +100,33 @@ public class PlatformManager : MonoBehaviour
         GameObject newPlatform = Instantiate(platformPrefab, spawnPosition, Quaternion.identity);
         newPlatform.layer = LayerMask.NameToLayer("Ground");
         platforms.Add(newPlatform);
+
+        return newPlatform;
     }
+
+    private void DespawnPlatforms()
+    {
+        // Use a temporary list to avoid modifying the list while iterating
+        List<GameObject> platformsToRemove = new List<GameObject>();
+
+        foreach (GameObject platform in platforms)
+        {
+            // Check if the platform is off-screen
+            if (platform.transform.position.x < mainCamera.transform.position.x - screenBounds.x - despawnOffset ||
+                platform.transform.position.x > mainCamera.transform.position.x + screenBounds.x + despawnOffset)
+            {
+                platformsToRemove.Add(platform);
+            }
+        }
+
+        // Now remove and destroy the off-screen platforms
+        foreach (GameObject platform in platformsToRemove)
+        {
+            platforms.Remove(platform);
+            Destroy(platform);
+        }
+    }
+
 
 
 }
