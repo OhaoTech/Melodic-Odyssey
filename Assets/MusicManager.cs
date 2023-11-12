@@ -23,6 +23,8 @@ public class MusicManager : MonoBehaviour
     private List<PitchData> pitchDataList;
     private int currentPitchIndex = 0;
 
+	private bool isPlaying = false;
+
     private void Start()
     {
         // Deserialize the JSON data
@@ -60,21 +62,24 @@ public class MusicManager : MonoBehaviour
 
     private void PlayCurrentPitch()
     {
-        PitchData currentPitchData = pitchDataList[currentPitchIndex];
-        musicSource.time = currentPitchData.time;
-        musicSource.Play();
+		if(!isPlaying){
+	        PitchData currentPitchData = pitchDataList[currentPitchIndex];
+	        musicSource.time = currentPitchData.time;
+	        musicSource.Play();
 
-        // Optionally, perform an action based on the pitch
-        HandlePitch(currentPitchData.pitch);
+	        // Optionally, perform an action based on the pitch
+	        HandlePitch(currentPitchData.pitch);
 
-        // Assuming each pitch segment lasts for a short duration (e.g., 1 second)
-        StartCoroutine(StopMusicAfterDelay(1.0f));
+	        // Assuming each pitch segment lasts for a short duration (e.g., 1 second)
+	        StartCoroutine(StopMusicAfterDelay(1.0f));
+		}
     }
 
     private IEnumerator StopMusicAfterDelay(float delay)
     {
         yield return new WaitForSeconds(delay);
         musicSource.Stop();
+ 		isPlaying = false;
     }
 
     private void HandlePitch(float pitch)
