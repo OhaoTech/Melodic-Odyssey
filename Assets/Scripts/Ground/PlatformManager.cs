@@ -19,14 +19,17 @@ public class PlatformManager : MonoBehaviour
     private Vector2 screenBounds;
     private GameObject lastSpawnedPlatform = null;
 
-    public GameObject notePrefab; // 音符预设的引用
-    public float noteHeight = 2f; // 音符相对于平台的高度
+    public GameObject notePrefab; 
+    public float noteHeight = 2f; 
+
+	public MusicManager musicManager;
 
     private void Start()
     {
         float camHeight = mainCamera.orthographicSize * 2;
         float camWidth = camHeight * mainCamera.aspect;
         screenBounds = new Vector2(camWidth, camHeight) / 2;
+		musicManager = GetComponent<MusicManager>();
     }
 
     private void Update()
@@ -60,7 +63,16 @@ public class PlatformManager : MonoBehaviour
         for (int i = 0; i < platformCount; i++)
         {
             lastSpawnedPlatform = SpawnPlatform(xPosition, yPosition);
-            if (lastSpawnedPlatform == null) break; // If failed to spawn, exit loop
+            if (lastSpawnedPlatform == null) break;
+
+            if (Random.value <= 0.7f) // 70% chance to spawn note on platform
+            {
+                SpawnNoteAbovePlatform(lastSpawnedPlatform);
+            }
+            else
+            {
+                SpawnNoteInAirOrGround(xPosition, yPosition); // New method to spawn note in air/ground
+            }
 
             float horizontalSpacing = Random.Range(minHorizontalSpacing, maxHorizontalSpacing);
             xPosition += lastSpawnedPlatform.GetComponent<Renderer>().bounds.size.x + horizontalSpacing;
@@ -140,13 +152,17 @@ public class PlatformManager : MonoBehaviour
     {
         Vector3 notePosition = platform.transform.position + new Vector3(0, noteHeight, 0);
 
-        // 实例化音符
         GameObject newNote = Instantiate(notePrefab, notePosition, Quaternion.identity);
 
-        // 确保新生成的音符具有 NoteManager 脚本
         NoteManager noteManager = newNote.AddComponent<NoteManager>();
-        // 如果您需要设置 NoteManager 的某些属性，可以在这里设置
-        // 例如：noteManager.fadeOutTime = 1f;
+    }
+
+	    private void SpawnNoteInAirOrGround(float xPosition, float yPosition)
+    {
+        // Logic to spawn note in air or on the ground
+        // Adjust position as needed
+        Vector3 notePosition = new Vector3(xPosition, yPosition + Random.Range(-2f, 5f), 0);
+        Instantiate(notePrefab, notePosition, Quaternion.identity);
     }
 
 

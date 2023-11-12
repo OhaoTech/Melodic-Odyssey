@@ -15,6 +15,8 @@ public class NoteManager : MonoBehaviour
     private float offScreenTimer = 0f; // Timer to track how long the note has been off-screen
     private bool isOffScreen = false; // Flag to indicate whether the note is off-screen
 
+    public MusicManager musicManager; // Reference to the MusicManager
+
     private void Start()
     {
         // Initialize the score value with a random number
@@ -41,14 +43,16 @@ public class NoteManager : MonoBehaviour
         }
     }
 
-        private void OnTriggerEnter2D(Collider2D other)
-    {
-        // Check if the collided object is the player
-        if (other.gameObject.CompareTag("Player"))
-        {
-            ConsumeNote();
-        }
-    }
+
+	private void OnTriggerEnter2D(Collider2D other)
+	{
+	    if (other.gameObject.CompareTag("Player"))
+	    {
+	        ConsumeNote();
+	        FindObjectOfType<MusicManager>().PlayMusicSegment(scoreValue); // 通知 GameManager
+	    }
+	}
+
 
     public void ConsumeNote()
     {

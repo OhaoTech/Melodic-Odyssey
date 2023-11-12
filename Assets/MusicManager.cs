@@ -1,8 +1,8 @@
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 
-public class MusicSyncManager : MonoBehaviour
+public class MusicManager : MonoBehaviour
 {
     public AudioSource musicSource; // Assign this in the Unity Editor
     public TextAsset pitchDataJson; // Assign the JSON file in the Unity Editor
@@ -29,21 +29,18 @@ public class MusicSyncManager : MonoBehaviour
         ResponseData responseData = JsonUtility.FromJson<ResponseData>(pitchDataJson.text);
         pitchDataList = responseData.pitch_data;
         pitchDataList = FilterPitchData(pitchDataList, 0.5f); // Example: 0.5 second interval
-
     }
 
-    private void Update()
+    // Method to be called by NoteManager when a note is hit
+    public void PlayMusicSegment(int scoreValue)
     {
-        // Check if 'P' key is pressed
-        if (Input.GetKeyDown(KeyCode.P))
+        if (currentPitchIndex < pitchDataList.Count)
         {
-            if (currentPitchIndex < pitchDataList.Count)
-            {
-                PlayCurrentPitch();
-                currentPitchIndex++;
-            }
+            PlayCurrentPitch();
+            currentPitchIndex++;
         }
     }
+
     private List<PitchData> FilterPitchData(List<PitchData> originalData, float minTimeInterval)
     {
         List<PitchData> filteredData = new List<PitchData>();
@@ -60,6 +57,7 @@ public class MusicSyncManager : MonoBehaviour
 
         return filteredData;
     }
+
     private void PlayCurrentPitch()
     {
         PitchData currentPitchData = pitchDataList[currentPitchIndex];
@@ -84,4 +82,6 @@ public class MusicSyncManager : MonoBehaviour
         // Implement your logic here based on the pitch value
         Debug.Log("Pitch event at pitch: " + pitch);
     }
+
+	
 }
