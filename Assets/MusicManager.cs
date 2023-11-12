@@ -85,7 +85,7 @@ public class MusicManager : MonoBehaviour
     private void HandlePitch(float pitch)
     {
         // Implement your logic here based on the pitch value
-        Debug.Log("Pitch event at pitch: " + pitch);
+        // Debug.Log("Pitch event at pitch: " + pitch);
     }
 
 	

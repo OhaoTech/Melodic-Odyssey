@@ -153,6 +153,7 @@ public class PlatformManager : MonoBehaviour
         Vector3 notePosition = platform.transform.position + new Vector3(0, noteHeight, 0);
 
         GameObject newNote = Instantiate(notePrefab, notePosition, Quaternion.identity);
+	    newNote.transform.SetParent(gameObject.transform);
 
         NoteManager noteManager = newNote.AddComponent<NoteManager>();
     }
@@ -162,7 +163,10 @@ public class PlatformManager : MonoBehaviour
         // Logic to spawn note in air or on the ground
         // Adjust position as needed
         Vector3 notePosition = new Vector3(xPosition, yPosition + Random.Range(-2f, 5f), 0);
-        Instantiate(notePrefab, notePosition, Quaternion.identity);
+        GameObject newNote = Instantiate(notePrefab, notePosition, Quaternion.identity);
+	    newNote.transform.SetParent(gameObject.transform);
+
+		NoteManager noteManager = newNote.AddComponent<NoteManager>();
     }
 
 
