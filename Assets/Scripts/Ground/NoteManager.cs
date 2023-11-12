@@ -10,6 +10,10 @@ public class NoteManager : MonoBehaviour
 
     private SpriteRenderer spriteRenderer;
     private Collider2D collider;
+    public float offScreenTimeThreshold = 3f; // Time in seconds a note can be off-screen before being destroyed
+
+    private float offScreenTimer = 0f; // Timer to track how long the note has been off-screen
+    private bool isOffScreen = false; // Flag to indicate whether the note is off-screen
 
     private void Start()
     {
@@ -22,7 +26,22 @@ public class NoteManager : MonoBehaviour
 
     }
 
-    private void OnTriggerEnter2D(Collider2D other)
+    private void Update()
+    {
+        if (isOffScreen)
+        {
+            // Increment the off-screen timer
+            offScreenTimer += Time.deltaTime;
+
+            // Check if the note has been off-screen for longer than the threshold
+            if (offScreenTimer >= offScreenTimeThreshold)
+            {
+                Destroy(gameObject);
+            }
+        }
+    }
+
+        private void OnTriggerEnter2D(Collider2D other)
     {
         // Check if the collided object is the player
         if (other.gameObject.CompareTag("Player"))
@@ -74,5 +93,17 @@ public class NoteManager : MonoBehaviour
         Destroy(gameObject);
     }
 
+    private void OnBecameInvisible()
+    {
+        // Start the timer when the note becomes invisible
+        isOffScreen = true;
+    }
+
+    private void OnBecameVisible()
+    {
+        // Reset the timer and flag when the note becomes visible again
+        isOffScreen = false;
+        offScreenTimer = 0f;
+    }
 
 }

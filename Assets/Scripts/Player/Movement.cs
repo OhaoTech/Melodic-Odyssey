@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.SocialPlatforms.Impl;
 
-public class NewBehaviourScript : MonoBehaviour
+public class Movement : MonoBehaviour
 {
     [SerializeField] private float speed; // Character movement speed
     [SerializeField] private float sprintMultiplier = 2f; // Multiplier for sprinting speed
@@ -18,6 +18,9 @@ public class NewBehaviourScript : MonoBehaviour
     private int jumpCount = 0; // Number of jumps made
     private float glideTimeLeft; // Remaining gliding time
 
+    private bool isSprinting = false; // Added variable to keep track of sprinting state
+
+
     public float score;
     private void Awake()
     {
@@ -29,17 +32,28 @@ public class NewBehaviourScript : MonoBehaviour
         // Horizontal Movement
         float horizontalInput = Input.GetAxis("Horizontal");
         float currentSpeed = speed;
+
         if (Input.GetKey(KeyCode.LeftShift) && isGrounded)
         {
-            currentSpeed *= sprintMultiplier; // Sprint only if on the ground
+            currentSpeed *= sprintMultiplier;
+            isSprinting = true; // Set sprinting state when sprinting starts
+        }
+        else if (isGrounded)
+        {
+            isSprinting = false; // Reset sprinting state when not sprinting
         }
 
-        // Maintain horizontal speed if in the air for more responsive movement controls
-        float horizontalVelocity = horizontalInput * currentSpeed;
+        float horizontalVelocity;
+
         if (!isGrounded)
         {
-            // Apply air control
-            horizontalVelocity = Mathf.Lerp(body.velocity.x, horizontalInput * currentSpeed, airControlFactor);
+            // Apply sprint multiplier if sprinting was active at the start of the jump
+            float airSpeed = isSprinting ? speed * sprintMultiplier : speed;
+            horizontalVelocity = Mathf.Lerp(body.velocity.x, horizontalInput * airSpeed, airControlFactor);
+        }
+        else
+        {
+            horizontalVelocity = horizontalInput * currentSpeed;
         }
 
 

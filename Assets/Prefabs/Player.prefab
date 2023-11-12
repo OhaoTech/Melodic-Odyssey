@@ -173,8 +173,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 7
+  sprintMultiplier: 2
   firstJumpForce: 0
+  secondJumpForce: 0
   glideForce: 0.5
   glideDuration: 1
   fallMultiplier: 2.5
   lowJumpMultiplier: 2
+  airControlFactor: 0.5
+  score: 0
